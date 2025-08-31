@@ -15,7 +15,7 @@ Define your portfolios in `data/input/{name}.csv` using CSV format.  The filenam
 
 ## Run Refresh.py to Download and Prepare Data
 
-There are 3 options for running the python scrupt.  If you don't care about installing system-wide python libraries just do the following:
+There are 3 options for running the python scrupt.  If you don't care about installing system-wide python libraries do the following:
 
 ```bash
 pip install -r requirements.txt
@@ -106,7 +106,7 @@ Overall Weighted Beta:      1.271
 Overall Weighted PE Ratio:  48.64
 ```
 
-### scripts/xxx.py
+### scripts/portfolio_performance_chart.py
 
 Prompt:
 
