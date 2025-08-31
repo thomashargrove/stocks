@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+/__pycache__
+.DS_Store
+.vscode/
+!data/input/example.csv
+data/
