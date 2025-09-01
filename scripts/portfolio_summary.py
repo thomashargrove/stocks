@@ -35,6 +35,10 @@ def calculate_portfolio_metrics(df: pd.DataFrame) -> pd.DataFrame:
         # Total current value
         total_value = portfolio_df['Current_Value'].sum()
         
+        # Calculate cash amount
+        cash_holdings = portfolio_df[portfolio_df['Symbol'] == 'CASH']
+        total_cash = cash_holdings['Current_Value'].sum()
+        
         # Total unrealized returns - only for positions with known purchase prices
         # Exclude positions where Purchase Price is 0 or NaN (unknown purchase price)
         known_purchases = portfolio_df[
@@ -60,6 +64,7 @@ def calculate_portfolio_metrics(df: pd.DataFrame) -> pd.DataFrame:
         portfolio_metrics.append({
             'Portfolio': portfolio_name,
             'Total_Value': total_value,
+            'Total_Cash': total_cash,
             'Weighted_Beta': weighted_beta,
             'Total_Unrealized_Returns': total_unrealized,
             'Weighted_PE_Ratio': weighted_pe
@@ -97,6 +102,7 @@ def main():
     for _, row in portfolio_summary.iterrows():
         print(f"Portfolio: {row['Portfolio']}")
         print(f"  Total Current Value:      ${row['Total_Value']:,.2f}")
+        print(f"  Cash:                     ${row['Total_Cash']:,.2f}")
         print(f"  Total Unrealized Returns: ${row['Total_Unrealized_Returns']:,.2f}")
         
         if pd.notna(row['Weighted_Beta']):
@@ -112,11 +118,13 @@ def main():
     
     # Print overall totals
     total_portfolio_value = portfolio_summary['Total_Value'].sum()
+    total_cash = portfolio_summary['Total_Cash'].sum()
     total_unrealized_returns = portfolio_summary['Total_Unrealized_Returns'].sum()
     
     print("OVERALL TOTALS")
     print("=" * 80)
     print(f"Total Portfolio Value:      ${total_portfolio_value:,.2f}")
+    print(f"Total Cash:                 ${total_cash:,.2f}")
     print(f"Total Unrealized Returns:   ${total_unrealized_returns:,.2f}")
     
     # Calculate overall weighted averages (excluding skipped portfolios)

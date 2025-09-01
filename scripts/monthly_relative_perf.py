@@ -225,14 +225,15 @@ def create_heatmap_visualization(heatmap_df: pd.DataFrame, month_labels: List[st
     for i in range(len(heatmap_df)):
         for j in range(len(month_labels)):
             value = heatmap_df.iloc[i, j]
-            text = ax.text(j, i, f'${value:.0f}', 
-                          ha='center', va='center', 
+            text = ax.text(j + 0.3, i, f'${value:,.0f}', 
+                          ha='right', va='center', 
                           color='white' if abs(value) > (vmax - vmin) * 0.3 else 'black',
                           fontweight='bold', fontsize=9)
     
     # Set ticks and labels
     ax.set_xticks(range(len(month_labels)))
     ax.set_xticklabels(month_labels, rotation=45, ha='right')
+    ax.xaxis.tick_top()  # Move x-axis labels to top
     ax.set_yticks(range(len(heatmap_df)))
     ax.set_yticklabels(heatmap_df.index)
     

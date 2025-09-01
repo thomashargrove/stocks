@@ -148,7 +148,8 @@ and generate a heatmap of monthly gains/losses in total dollars for each unique 
 of the previous 10 months.  Order the stocks from largest overall percent to least top-to-bottom.
 Color the cells from red-yellow-green where red is the most lost and green is most gained.
 Stock symbols should be listed top to bottom, and months left-right with most recent on left
-and oldest on right.
+and oldest on right.  Cell values should start with a $, have thousands-commas, and be right 
+justified.  Please label the months along the top.
 ```
 
 Output:
