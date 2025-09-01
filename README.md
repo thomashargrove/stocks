@@ -73,7 +73,7 @@ Perf_Rel_SPY_12m.  Write the output image to data/output and don't pop anything 
 
 Generates:
 
-<img width="3564" height="2364" alt="image" src="https://github.com/user-attachments/assets/14e57402-48f6-4478-9c4f-ce40b9eb8679" />
+<img width="3564" height="2364" alt="scatter" src="https://github.com/user-attachments/assets/2bb04681-667f-4f6f-8fcb-5ee944d48b2d" />
 
 ### scripts/portfolio_summary.py
 
@@ -122,4 +122,4 @@ reference.  Write the output image to data/output/
 
 Output:
 
-<img width="4171" height="2370" alt="portfolio_performance_chart" src="https://github.com/user-attachments/assets/07193d77-2071-4c17-a806-2b24537b4d42" />
+<img width="4171" height="2370" alt="perf" src="https://github.com/user-attachments/assets/9e694b01-4138-40d5-b0e2-b66e6d2f9a58" />
