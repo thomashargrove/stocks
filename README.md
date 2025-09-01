@@ -6,7 +6,7 @@ these two inputs into promots for ClaudeCode, Cursor or another AI coding agent 
 
 ## Quick Start - Define Portfolios
 
-Define your portfolios in `data/input/{portforlio_name}.csv` using the below CSV format (there is already an example checked in).  This format is compatible with Yahoo Finance Portfolio CSV download.
+Define your portfolios in `data/input/{portforlio_name}.csv` using the below CSV format (there is already an example checked in [here](data/input/example.csv)).  This format is compatible with Yahoo Finance Portfolio CSV download.
 
 
 | Symbol | Trade Date | Purchase Price | Quantity | Comment |
