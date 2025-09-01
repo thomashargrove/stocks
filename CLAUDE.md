@@ -59,6 +59,7 @@ make clean
 1) Add type hints everywhere and an explicit return type.
 2) Include a brief docstring describing parameters and return values.
 3) If a type is uncertain, choose the narrowest reasonable type and add a `# TODO: refine type` note.
+4) **Pandas datetime parsing**: Always use `utc=True` parameter with `pd.to_datetime()` to avoid FutureWarnings about mixed time zones.
 
 ## Testing
 

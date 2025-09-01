@@ -66,7 +66,7 @@ Now that your computed data is ready, you can have an AI coding agent create cus
 ### scripts/beta_vs_perfoemance.py
 
 ```
-Write me a script in scripts/ folder, that reads data/computed/combined.csv and generates a 
+Write me a python script at scripts/beta_vs_perfoemance.py that reads data/computed/combined.csv and generates a 
 scatter plot for all unique symbols with one axis as beta and the other axis as the column 
 Perf_Rel_SPY_12m.  Write the output image to data/output and don't pop anything up.
 ```
@@ -78,7 +78,7 @@ Generates:
 ### scripts/portfolio_summary.py
 
 ```
-write me a script in scripts/ folder, that reads data/computed/combined.csv and generates a 
+write me a python script scripts/portfolio_summary.py that reads data/computed/combined.csv and generates a 
 summary for each portfolio, including total current value, unrealized returns, weighted beta,
 and weighted PE ratio.  Sort portfolios by total value descending.  At the end include an 
 overall total and weighted averages across all portfolios.  Handle missing data gracefully 
@@ -111,9 +111,9 @@ Overall Weighted PE Ratio:  48.64
 Prompt:
 
 ```
-write me a script in scripts/ folder, that reads data/computed/combined.csv.  I want it to 
-group together each symbol across portfolios and render a graph where symbols are ordered 
-top to bottom based on total percent of overall.  The text on the left should be "{symbol} 
+write me a python script portfolio_performance_chart.py that reads data/computed/combined.csv.  
+I want it to group together each symbol across portfolios and render a graph where symbols are 
+ordered top to bottom based on total percent of overall.  The text on the left should be "{symbol} 
 (portfolio1, portfolio2) %25".  To the right of that should be a display  of relative 
 performance to S&P500.  Each entry will get a small arrow from 12mon perf to 3mon perf, and 
 a big arrow from 3mon relative perf to 1mon relative perf.  Show a dotted line for SPY500 
@@ -123,3 +123,16 @@ reference.  Write the output image to data/output/
 Output:
 
 <img width="4171" height="2370" alt="perf" src="https://github.com/user-attachments/assets/9e694b01-4138-40d5-b0e2-b66e6d2f9a58" />
+
+### scripts/upside_downside.py
+
+```
+Write me a python script scripts/upside_downside.py that calculates upside capture, downside 
+capture, and spread ratios for unique stocks across all portfolios using 1-year of daily price 
+history.  List of stocks can be found in data/computed/combined.csv and price history for all 
+symbols are in data/history/{symbol}.csv.  Order outputs from largest to smallest holdings.
+Output a heatmap with up/down cells collored from red-yellow-green based on how small-large
+the values are.
+```
+
+Output:
