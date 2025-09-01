@@ -154,4 +154,4 @@ justified.  Please label the months along the top.
 
 Output:
 
-<img width="1307" height="796" alt="image" src="https://github.com/user-attachments/assets/023f9cfb-d393-4b23-ad64-74919b4aa4cf" />
+<img width="1377" height="783" alt="image" src="https://github.com/user-attachments/assets/1dcb9f25-4d6f-453f-b213-80557cb2185b" />
