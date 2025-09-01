@@ -33,13 +33,13 @@ def refresh_ticker_history(symbol: str, output_path: str) -> None:
         symbol: Stock ticker symbol to process
         output_path: Full path to the output CSV file
     """
-    dat = yfc.Ticker(symbol)
-
-    # Date index (timezone-aware timestamps)
-    # Columns: Open, High, Low, Close, Volume, Dividends, Stock Splits, Capital Gains, Repaired, FetchDate
-    # 5 rows for the 1-week period (Aug 25-29, 2025)
-    # 10 columns of data per day
-    history_data = dat.history(period="1y")
+    try:
+        dat = yfc.Ticker(symbol)
+        history_data = dat.history(period="1y")
+    except (TypeError, ValueError, Exception) as e:
+        print(f"Error fetching data for {symbol}: {e}")
+        print(f"Skipping {symbol} - ticker may be invalid or delisted")
+        return
     #print(f"History data:\n{history_data}")
     
     #beta = dat.info.get("beta")
