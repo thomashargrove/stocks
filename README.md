@@ -153,3 +153,5 @@ justified.  Please label the months along the top.
 ```
 
 Output:
+
+<img width="1307" height="796" alt="image" src="https://github.com/user-attachments/assets/023f9cfb-d393-4b23-ad64-74919b4aa4cf" />
