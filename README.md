@@ -138,3 +138,17 @@ the values are.
 Output:
 
 <img width="800" height="616" alt="image" src="https://github.com/user-attachments/assets/0e99e99c-07c7-4cd1-978c-a236a34a0120" />
+
+### scripts/monthly_gains.py
+
+```
+Write me a python script scripts/monthly_relative_perf.py that reads in the stocks from 
+data/computed/combined.csv and 1-year of daily price history from data/history/{tickert}.csv
+and generate a heatmap of monthly gains/losses in total dollars for each unique stock for each
+of the previous 10 months.  Order the stocks from largest overall percent to least top-to-bottom.
+Color the cells from red-yellow-green where red is the most lost and green is most gained.
+Stock symbols should be listed top to bottom, and months left-right with most recent on left
+and oldest on right.
+```
+
+Output:
