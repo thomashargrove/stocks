@@ -1,10 +1,12 @@
 # Stock Portfolio Analysis
 
-A simple Python program that retrieves stock market history for one or more portfolios, creating an output dataset that an AI coding agent can use for custom analysis and visulizations.
+A simple Python program that retrieves stock market history for one or more portfolios, creating an output dataset that an AI coding agent can use for custom analysis and visulizations.  It calls yfinance_cache under the hood with rate limiting, which scrapes stock data from yahoo finance.  It maintains a local cache to later runs only need
+to pull incremental updates.  The output of the script is one combined csv with ticker position information and a history folder for last year's daily prices.  You can reference
+these two inputs into promots for ClaudeCode, Cursor or another AI coding agent and have it quickly code up any visulization or analysis you want.  See the examples below.
 
 ## Quick Start - Define Portfolios
 
-Define your portfolios in `data/input/{name}.csv` using CSV format.  The filename will be used as the portfolio name, and use the following schema.  This format is compatible with Yahoo Finance Portfolio CSV download.
+Define your portfolios in `data/input/{portforlio_name}.csv` using the below CSV format (there is already an example checked in).  This format is compatible with Yahoo Finance Portfolio CSV download.
 
 
 | Symbol | Trade Date | Purchase Price | Quantity | Comment |
@@ -22,7 +24,7 @@ pip install -r requirements.txt
 python refresh.py
 ```
 
-To use a virtual environmebnt
+To use a virtual environment:
 
 ```bash
 python3 -m venv venv
