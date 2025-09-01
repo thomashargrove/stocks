@@ -136,3 +136,5 @@ the values are.
 ```
 
 Output:
+
+<img width="800" height="616" alt="image" src="https://github.com/user-attachments/assets/0e99e99c-07c7-4cd1-978c-a236a34a0120" />
