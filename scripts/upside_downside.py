@@ -115,7 +115,7 @@ def create_heatmap(results: list[dict[str, Any]]) -> None:
     
     # Convert to DataFrame for easier manipulation
     df = pd.DataFrame(results)
-    df = df.sort_values('Holdings_Value', ascending=True)  # Bottom to top for better visualization
+    df = df.sort_values('Holdings_Value', ascending=False)  # Top to bottom by largest holdings
     
     # Create data matrix for heatmap (stocks x [upside, downside])
     stocks = df['Symbol'].tolist()
