@@ -143,6 +143,8 @@ Output:
 
 ### scripts/monthly_gains.py
 
+Prompt:
+
 ```
 Write me a python script scripts/monthly_relative_perf.py that reads in the stocks from 
 data/computed/combined.csv and 1-year of daily price history from data/history/{tickert}.csv
@@ -157,3 +159,17 @@ justified.  Please label the months along the top.
 Output:
 
 <img width="1377" height="783" alt="image" src="https://github.com/user-attachments/assets/1dcb9f25-4d6f-453f-b213-80557cb2185b" />
+
+### scripts/last_year.py
+
+Prompt:
+
+```
+Write me a python script scripts/last_year.py that reads my stock portfolio from data/computed/combined.csv 
+and ticker history from data/history/{ticker}.csv, and for each day in the 1-year history compute my 
+sum(cash+stocks), sum(cash), sum(stocks) for only stocks I held at that time, if no purchase date then 
+include it.  The output should be a line graph with those three values for the last year, but I also want a 
+line for the S&P500 shown as a % with the line at the same starting point as my total account value.
+```
+
+Output:
