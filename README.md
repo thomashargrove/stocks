@@ -173,3 +173,5 @@ line for the S&P500 shown as a % with the line at the same starting point as my 
 ```
 
 Output:
+
+<img width="2780" height="1180" alt="image" src="https://github.com/user-attachments/assets/ca0c97fb-868e-4d34-8def-ebbb22b8d43a" />
