@@ -17,6 +17,8 @@ Notes/assumptions:
 - CASH rows are treated as a single symbol "CASH" with price fixed at 1.0.
 - Uses Close prices.
 - S&P 500 reference uses SPY from data/history/SPY.csv and is normalized to start at the same value as total on the first chart day, plotted on a right y-axis as a % series.
+ - To avoid artificial outperformance from mid-window purchases, cash is backfilled before each lot's trade date
+   with an amount approximating its cost basis (trade-date close preferred; otherwise Purchase Price).
 """
 
 from __future__ import annotations
@@ -42,10 +44,23 @@ OUTPUT_PATH = OUTPUT_DIR / "last_year.png"
 
 @dataclass
 class Lot:
+    """Represents a single position lot.
+
+    Parameters
+    - portfolio: Portfolio/account name the lot belongs to.
+    - symbol: Stock or fund ticker.
+    - trade_date: Purchase date for the lot; None if unknown/aggregated.
+    - quantity: Number of shares held for this lot.
+    - purchase_price: Cost basis per share if available.
+
+    Returns
+    - Dataclass used internally for computing time series.
+    """
     portfolio: str
     symbol: str
     trade_date: date | None
     quantity: float
+    purchase_price: float | None
 
 
 def _parse_trade_date(value: str | None) -> date | None:
@@ -101,9 +116,23 @@ def load_lots_from_combined(path: Path) -> Tuple[List[Lot], float]:
             continue
 
         trade_date = _parse_trade_date(row.get("Trade Date"))
+        # Parse purchase price if present (used for pre-buy cash backfill)
+        pp_raw = (row.get("Purchase Price") or "").strip()
+        try:
+            purchase_price = float(pp_raw) if pp_raw != "" else None
+        except Exception:
+            purchase_price = None
         if quantity == 0:
             continue
-        lots.append(Lot(portfolio=portfolio, symbol=symbol, trade_date=trade_date, quantity=quantity))
+        lots.append(
+            Lot(
+                portfolio=portfolio,
+                symbol=symbol,
+                trade_date=trade_date,
+                quantity=quantity,
+                purchase_price=purchase_price,
+            )
+        )
 
     return lots, total_cash_quantity
 
@@ -158,7 +187,23 @@ def build_trading_calendar(symbols: List[str], start_d: date, end_d: date) -> Li
 
 
 def compute_time_series(lots: List[Lot], cash_balance: float, dates: List[date]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    # Aggregate lots by symbol with earliest trade date per lot; we will include lot quantity only after its trade_date.
+    """Compute portfolio time series.
+
+    Parameters
+    - lots: Lots held currently across portfolios.
+    - cash_balance: Current total cash across portfolios (treated as dollars).
+    - dates: Trading calendar to evaluate on.
+
+    Returns
+    - total_series: Total portfolio value per date (cash + stocks) with cash backfill.
+    - cash_series: Cash component per date (including pre-buy backfill before each lot's trade_date).
+    - stocks_series: Stocks component per date.
+
+    Notes
+    - To reduce artificial jumps from mid-window purchases, we backfill cash before a lot's trade_date
+      by adding an amount equal to its cost basis (prefer purchase_price*quantity; fallback to trade-day close*quantity).
+    """
+    # Aggregate lots by symbol with earliest trade date per lot; include lot quantity only after its trade_date.
     # If trade_date is None, include for all dates.
     # For each date: stocks_value = sum_over_symbols( price(symbol, date) * sum(quantities active on date) )
     symbols = sorted({lot.symbol for lot in lots})
@@ -173,8 +218,11 @@ def compute_time_series(lots: List[Lot], cash_balance: float, dates: List[date])
         ds, _ = history[sym]
         date_to_index_cache[sym] = {d: i for i, d in enumerate(ds)}
 
-    stocks_series = np.zeros(len(dates), dtype=float)
-    cash_series = np.full(len(dates), cash_balance, dtype=float)
+    n = len(dates)
+    stocks_series = np.zeros(n, dtype=float)
+    cash_series = np.full(n, cash_balance, dtype=float)
+    # Accumulator for pre-buy cash backfill (added only before each lot's first active date)
+    prebuy_cash = np.zeros(n, dtype=float)
 
     # For efficiency, compute per-symbol active quantity vector across dates
     for sym in symbols:
@@ -182,7 +230,7 @@ def compute_time_series(lots: List[Lot], cash_balance: float, dates: List[date])
         if len(ds) == 0:
             continue
         # Build active quantity per date for this symbol
-        active_qty = np.zeros(len(dates), dtype=float)
+        active_qty = np.zeros(n, dtype=float)
         for lot in lots:
             if lot.symbol != sym:
                 continue
@@ -200,10 +248,35 @@ def compute_time_series(lots: List[Lot], cash_balance: float, dates: List[date])
                     start_index = i + 1
             if start_index < len(dates):
                 active_qty[start_index:] += lot.quantity
+            # Backfill cash before the trade date to avoid artificial jumps
+            if lot.trade_date is not None and start_index > 0:
+                # Prefer the trade-date close for continuity; fallback to purchase price,
+                # then to last available close prior to the trade date.
+                basis_value: float = 0.0
+                ds_idx_map = date_to_index_cache.get(sym, {})
+                j = ds_idx_map.get(lot.trade_date)
+                if j is not None:
+                    _, closes_arr = history[sym]
+                    basis_value = float(closes_arr[j]) * lot.quantity
+                elif (lot.purchase_price or 0.0) > 0:
+                    basis_value = float(lot.purchase_price) * lot.quantity
+                else:
+                    ds_list, closes_arr = history[sym]
+                    t_ord = lot.trade_date.toordinal()
+                    best_j = -1
+                    for k, dk in enumerate(ds_list):
+                        if dk.toordinal() <= t_ord:
+                            best_j = k
+                        else:
+                            break
+                    if best_j >= 0:
+                        basis_value = float(closes_arr[best_j]) * lot.quantity
+                if basis_value > 0:
+                    prebuy_cash[:start_index] += basis_value
 
         # Map close prices to our calendar using last available close up to that date (forward-unavailable → use exact match only)
         # We will use exact-date match; if date missing for symbol, treat price as NaN and contribute 0 for that date.
-        price_vec = np.full(len(dates), np.nan, dtype=float)
+        price_vec = np.full(n, np.nan, dtype=float)
         date_to_idx = date_to_index_cache[sym]
         for i, d in enumerate(dates):
             j = date_to_idx.get(d)
@@ -214,6 +287,9 @@ def compute_time_series(lots: List[Lot], cash_balance: float, dates: List[date])
         contrib = np.nan_to_num(price_vec, nan=0.0) * active_qty
         stocks_series += contrib
 
+    # Apply pre-buy cash backfill
+    if np.any(prebuy_cash):
+        cash_series = cash_series + prebuy_cash
     total_series = stocks_series + cash_series
     return total_series, cash_series, stocks_series
 
@@ -237,6 +313,25 @@ def load_spy_series_aligned(dates: List[date]) -> Tuple[np.ndarray, np.ndarray]:
     base = aligned[non_nan_indices[0]]
     pct = (aligned / base) - 1.0
     return aligned, pct
+
+
+def compute_month_start_indices(dates: List[date]) -> List[int]:
+    """Return indices in dates corresponding to the first trading day of each month.
+
+    Parameters
+    - dates: Trading calendar as a list of date objects.
+
+    Returns
+    - List of integer indices where a new month begins in the calendar.
+    """
+    seen: set[Tuple[int, int]] = set()
+    indices: List[int] = []
+    for i, d in enumerate(dates):
+        key = (d.year, d.month)
+        if key not in seen:
+            seen.add(key)
+            indices.append(i)
+    return indices
 
 
 def main() -> None:
@@ -286,6 +381,10 @@ def main() -> None:
 
     ax_left.set_title("Last Year: Portfolio Value vs S&P 500")
     ax_left.grid(True, alpha=0.3)
+    # Draw vertical lines at the start of each month
+    month_start_idxs = compute_month_start_indices(calendar)
+    for idx in month_start_idxs:
+        ax_left.axvline(calendar[idx], color="#999999", linewidth=0.8, alpha=0.35, zorder=0)
     lines, labels = ax_left.get_legend_handles_labels()
     ax_left.legend(lines, labels, loc="upper left")
 
@@ -297,5 +396,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

@@ -169,8 +169,8 @@ def create_heatmap_data(
             all_performance[ticker] = monthly_perf
             all_months.update(monthly_perf.keys())
     
-    # Create sorted list of months (most recent first)
-    month_labels = sorted(list(all_months), reverse=True)[:10]  # Last 10 months
+    # Create sorted list of months (oldest to newest, keeping last 10 months)
+    month_labels = sorted(list(all_months))[-10:]
     
     # Create matrix for heatmap
     heatmap_data = []
@@ -194,18 +194,31 @@ def create_heatmap_data(
     performance_series = pd.Series(overall_performance, index=stock_symbols)
     sorted_indices = performance_series.sort_values(ascending=False).index
     heatmap_df = heatmap_df.loc[sorted_indices]
+
+    # Append total row (sum across all stocks per month) at the bottom
+    total_row = heatmap_df.sum(axis=0)
+    heatmap_df = pd.concat([heatmap_df, pd.DataFrame([total_row], index=['TOTAL'])])
     
     return heatmap_df, month_labels
 
 
-def create_heatmap_visualization(heatmap_df: pd.DataFrame, month_labels: List[str]) -> None:
+def create_heatmap_visualization(heatmap_df: pd.DataFrame, month_labels: List[str], output_dir: str = "data/output", filename: str = "monthly_relative_perf.png") -> Path:
     """
-    Create and display the heatmap visualization.
+    Create the heatmap visualization and save it to disk.
     
     Args:
         heatmap_df: DataFrame with monthly performance data
         month_labels: List of month labels for columns
+        output_dir: Directory to write the output image
+        filename: Output image filename
+    
+    Returns:
+        Path to the saved image file
     """
+    # Ensure output directory exists
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     fig, ax = plt.subplots(figsize=(14, max(8, len(heatmap_df) * 0.6)))
     
     # Create custom colormap (red-yellow-green only)
@@ -213,9 +226,14 @@ def create_heatmap_visualization(heatmap_df: pd.DataFrame, month_labels: List[st
     n_bins = 100
     cmap = mcolors.LinearSegmentedColormap.from_list('RdYlGn', colors, N=n_bins)
     
-    # Get data values for color scaling
-    vmin = heatmap_df.values.min()
-    vmax = heatmap_df.values.max()
+    # Get data values for color scaling (exclude TOTAL to avoid skewing scale)
+    df_for_scale = heatmap_df.drop(index='TOTAL', errors='ignore')
+    if not df_for_scale.empty:
+        vmin = df_for_scale.values.min()
+        vmax = df_for_scale.values.max()
+    else:
+        vmin = heatmap_df.values.min()
+        vmax = heatmap_df.values.max()
     
     # Create the heatmap manually
     im = ax.imshow(heatmap_df.values, cmap=cmap, aspect='auto', 
@@ -249,23 +267,31 @@ def create_heatmap_visualization(heatmap_df: pd.DataFrame, month_labels: List[st
     
     plt.title('Monthly Stock Performance Heatmap (Dollar Gains/Losses)\nPast 10 Months', 
               fontsize=16, fontweight='bold', pad=20)
-    plt.xlabel('Month (Most Recent → Oldest)', fontsize=12)
+    plt.xlabel('Month (Oldest → Most Recent)', fontsize=12)
     plt.ylabel('Stocks (Ranked by Overall Performance)', fontsize=12)
     
     plt.tight_layout()
-    plt.show()
+    # Save to file instead of showing
+    output_path = out_dir / filename
+    fig.savefig(output_path, dpi=200, bbox_inches='tight')
+    plt.close(fig)
     
     # Print summary statistics
     print(f"\nHeatmap Summary:")
-    print(f"Stocks analyzed: {len(heatmap_df)}")
+    num_stocks = len(heatmap_df) - (1 if 'TOTAL' in heatmap_df.index else 0)
+    print(f"Stocks analyzed: {num_stocks}")
     print(f"Months covered: {len(month_labels)}")
-    print(f"Date range: {month_labels[-1]} to {month_labels[0]}")
+    print(f"Date range: {month_labels[0]} to {month_labels[-1]}")
     
     # Show top and bottom performers
     total_performance = heatmap_df.sum(axis=1)
     print(f"\nTop 3 performers (total $):")
     for i, (stock, perf) in enumerate(total_performance.head(3).items(), 1):
         print(f"  {i}. {stock}: ${perf:,.0f}")
+
+    print(f"\nSaved heatmap to: {output_path}")
+
+    return output_path
     
     print(f"\nBottom 3 performers (total $):")
     for i, (stock, perf) in enumerate(total_performance.tail(3).items(), 1):
