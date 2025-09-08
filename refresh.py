@@ -141,18 +141,21 @@ def parse_portfolios(portfolios_dir: str) -> pd.DataFrame:
     return _build_portfolio_dataframe(portfolio_data)
 
 def refresh_stock_history(portfolios: pd.DataFrame, stock_history_dir: str) -> None:
-    """Refresh historical data for all unique stock symbols in portfolios (excluding cash).
+    """Refresh historical data for all unique stock symbols in portfolios (excluding cash) plus SPY.
     
     Args:
         portfolios: DataFrame containing portfolio data with Symbol column
         stock_history_dir: Directory to save stock history CSV files
     """
-    if portfolios.empty:
-        return
+    # Always include SPY for relative performance calculations
+    stock_symbols = {"SPY"}
     
-    # Get unique symbols excluding cash
-    unique_symbols = portfolios['Symbol'].unique()
-    stock_symbols = [symbol for symbol in unique_symbols if symbol not in CASH_SYMBOLS]
+    # Add portfolio symbols if portfolios is not empty
+    if not portfolios.empty:
+        # Get unique symbols excluding cash
+        unique_symbols = portfolios['Symbol'].unique()
+        portfolio_stocks = [symbol for symbol in unique_symbols if symbol not in CASH_SYMBOLS]
+        stock_symbols.update(portfolio_stocks)
     
     for symbol in stock_symbols:
         output_path = os.path.join(stock_history_dir, f"{symbol}.csv")
