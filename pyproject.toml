@@ -9,5 +9,6 @@ dependencies = [
     "pandas>=2.3.2",
     "pytest>=8.4.1",
     "requests-ratelimiter>=0.7.0",
+    "squarify>=0.4.4",
     "yfinance-cache>=0.7.13",
 ]
