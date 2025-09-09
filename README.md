@@ -175,3 +175,15 @@ line for the S&P500 shown as a % with the line at the same starting point as my 
 Output:
 
 <img width="2780" height="1180" alt="image" src="https://github.com/user-attachments/assets/ca0c97fb-868e-4d34-8def-ebbb22b8d43a" />
+
+### scripts/treemap.py
+
+Prompt:
+
+```
+write a python script scripts/treemap.py that reads data/computed/combined.csv and generates a headmap image in data/output.  I want a cell for each ticker, with the size based on the percent of overall, and I want each cell colored from red-yellow-green based on 1-year relative performance to the SYP (there is a column for that).  Under each ticker include the relative perf, so if it did 10% better than SPY it includes "10%".  Draw a thin black box around each cell
+```
+
+Output:
+
+<img width="4769" height="3572" alt="image" src="https://github.com/user-attachments/assets/464f495c-71a1-4041-894f-4cbf62d200e8" />
